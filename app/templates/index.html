@@ -1,0 +1,40 @@
+{% extends "base.html" %}{% block c %}
+<h2>Painel de deputados por partido</h2>
+<p style="color:var(--mudo);margin:0 0 16px">Deputados em exercício · gastos da cota parlamentar em {{ ano }}</p>
+<form class="card filtros">
+  <input name="nome" placeholder="Nome (ex.: %marina%)" value="{{ f.nome }}" title="Use % como curinga: %marina%, ana%, %silva">
+  <input name="partido" list="lp" placeholder="Partido (PT,PL)" value="{{ f.partido }}" size="12">
+  <datalist id="lp">{% for p in partidos %}<option value="{{ p.sigla }}">{% endfor %}</datalist>
+  <input name="uf" list="lu" placeholder="UF" value="{{ f.uf }}" size="5">
+  <datalist id="lu">{% for u in ufs %}<option value="{{ u.sigla }}">{% endfor %}</datalist>
+  <select name="ano">{% for a in anos %}<option {{ 'selected' if a==ano }}>{{ a }}</option>{% endfor %}</select>
+  <button class="bt">Buscar</button>
+</form>
+<div class="kpis">
+  <div class="card kpi"><small>Deputados</small><b>{{ total }}</b><span>{{ grupos|length }} partido(s)</span></div>
+  <div class="card kpi"><small>Gasto total ({{ ano }})</small><b>{{ total_gasto|brl_curto }}</b><span>{{ total_gasto|brl }}</span></div>
+  {% if maior %}<div class="card kpi"><small>Partido que mais gastou</small><b>{{ maior.sigla }}</b><span>{{ maior.gasto|brl_curto }}</span></div>{% endif %}
+</div>
+<div class="graficos">
+  <div class="card"><h4>Deputados por partido</h4><div class="cv"><canvas id="g1"></canvas></div></div>
+  <div class="card"><h4>Gasto por partido ({{ ano }})</h4><div class="cv"><canvas id="g2"></canvas></div></div>
+</div>
+<h3>Totais por partido</h3>
+<div class="chips">{% for g in grupos %}<a class="chip" href="#p-{{ g.sigla }}"><b>{{ g.sigla }}</b>{{ g.deps|length }} dep. · <span>{{ g.gasto|brl_curto }}</span></a>{% endfor %}</div>
+{% for g in grupos %}
+<section id="p-{{ g.sigla }}" class="card">
+  <div class="ph"><h3>{{ g.sigla }} <small>{{ g.deps|length }} deputado(s)</small></h3>
+  <span>Total {{ g.gasto|brl }} · média {{ g.media|brl }}</span></div>
+  <div class="tabela"><table><tr><th>ID</th><th>Nome</th><th>UF</th><th class="n">Gasto {{ ano }}</th></tr>
+  {% for d in g.deps %}<tr><td>{{ d.id }}</td><td><a href="/deputado/{{ d.id }}?ano={{ ano }}">{{ d.nome }}</a></td><td>{{ d.siglaUf }}</td><td class="n">{{ d.gasto|brl }}</td></tr>{% endfor %}</table></div>
+</section>{% else %}<p>Nenhum resultado.</p>{% endfor %}
+<p class="nota">Gastos somados por deputado atualmente em exercício e atribuídos ao partido atual. Fonte: arquivos da cota parlamentar (camara.leg.br/cotas).</p>
+{% endblock %}
+{% block js %}<script nonce="{{ nonce }}">
+const G={{ graf|tojson }};
+function desenhar(){
+  grafico('g1','bar',G.siglas,G.deps,'--verde');
+  grafico('g2','bar',G.siglas,G.gasto,'--laranja',{fmt:v=>v>=1e6?'R$ '+(v/1e6).toFixed(1)+' mi':brl(v)});
+}
+desenhar();
+</script>{% endblock %}

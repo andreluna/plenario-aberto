@@ -1,0 +1,19 @@
+{% extends "base.html" %}{% block title %}Votações · Plenário Aberto{% endblock %}{% block c %}
+<h2>Votações</h2>
+<p style="color:var(--mudo);margin:0 0 16px">Votações da Câmara no período, da mais recente para a mais antiga</p>
+<form class="card filtros">
+  <label>De <input type="date" name="ini" value="{{ ini }}"></label>
+  <label>até <input type="date" name="fim" value="{{ fim }}"></label>
+  <button class="bt">Filtrar</button>
+</form>
+<div class="card tabela" style="margin-top:16px"><table><tr><th>Data</th><th>Órgão</th><th>Descrição</th><th>Resultado</th></tr>
+{% for v in lista %}<tr><td>{{ v.data }}</td><td>{{ v.siglaOrgao }}</td>
+<td class="desc"><a href="/votacoes/{{ v.id }}">{{ (v.descricao or 'Sem descrição')[:180] }}</a></td>
+<td>{% if v.aprovacao == 1 %}<span class="tag ok">Aprovada</span>{% elif v.aprovacao == 0 %}<span class="tag no">Rejeitada</span>{% else %}—{% endif %}</td></tr>
+{% else %}<tr><td colspan="4">Nenhuma votação no período.</td></tr>{% endfor %}</table></div>
+<div class="pag">
+  {% if pagina>1 %}<a href="?ini={{ ini }}&fim={{ fim }}&pagina={{ pagina-1 }}">← Anterior</a>{% endif %}
+  <span>Página {{ pagina }}</span>
+  {% if tem_prox %}<a href="?ini={{ ini }}&fim={{ fim }}&pagina={{ pagina+1 }}">Próxima →</a>{% endif %}
+</div>
+{% endblock %}

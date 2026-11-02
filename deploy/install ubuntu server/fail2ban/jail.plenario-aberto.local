@@ -1,0 +1,34 @@
+# /etc/fail2ban/jail.d/plenario-aberto.local
+[DEFAULT]
+ignoreip = 127.0.0.1/8 ::1 __IGNOREIP__
+bantime  = 1h
+findtime = 10m
+maxretry = 5
+
+# Tentativas de login por SSH
+[sshd]
+enabled = true
+
+# Robôs conhecidos (User-Agent) nos logs de acesso
+[apache-badbots]
+enabled  = true
+port     = http,https
+logpath  = /var/log/apache2/plenario-aberto-*access.log
+maxretry = 1
+
+# Requisições malformadas / estouro de limites (log de erro)
+[apache-overflows]
+enabled  = true
+port     = http,https
+logpath  = /var/log/apache2/plenario-aberto-*error.log
+maxretry = 2
+
+# Varredura de URLs e abuso do limite do mod_evasive (muitos 400/403/404/405 em pouco tempo)
+[plenario-aberto-http-erros]
+enabled  = true
+port     = http,https
+filter   = plenario-aberto-http-erros
+logpath  = /var/log/apache2/plenario-aberto-*access.log
+findtime = 60
+maxretry = 30
+bantime  = 1h

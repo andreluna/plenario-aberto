@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% block title %}{{ p.siglaTipo }} {{ p.numero }}/{{ p.ano }} · Plenário Aberto{% endblock %}{% block c %}
+<p><a href="/proposicoes">← Proposições</a></p>
+<div class="card">
+  <h2>{{ p.siglaTipo }} {{ p.numero }}/{{ p.ano }}</h2>
+  <p><span class="tag">{{ p.descricaoTipo }}</span>
+  {% if p.statusProposicao.descricaoSituacao %}<span class="tag ok">{{ p.statusProposicao.descricaoSituacao }}</span>{% endif %}
+  <span style="color:var(--mudo)">Apresentada em {{ (p.dataApresentacao or '')[:10] }} · ID {{ p.id }}</span></p>
+  <p class="desc">{{ p.ementa }}</p>
+  {% if p.keywords %}<p style="color:var(--mudo)"><b>Palavras-chave:</b> {{ p.keywords }}</p>{% endif %}
+  {% if p.urlInteiroTeor %}<p style="margin-bottom:0"><a href="{{ p.urlInteiroTeor }}" target="_blank" rel="noopener">Inteiro teor ↗</a></p>{% endif %}
+</div>
+<h3>Autores</h3>
+<div class="card">{% for a in autores %}{% if a.dep_id %}<a href="/deputado/{{ a.dep_id }}">{{ a.nome }}</a>{% else %}{{ a.nome }}{% endif %} <small style="color:var(--mudo)">({{ a.tipo }})</small>{{ ', ' if not loop.last }}{% else %}Sem autores informados.{% endfor %}</div>
+<h3>Votações</h3>
+<div class="card tabela">{% if vots %}<table><tr><th>Data</th><th>Descrição</th><th>Resultado</th></tr>
+{% for v in vots %}<tr><td>{{ v.data }}</td><td class="desc"><a href="/votacoes/{{ v.id }}">{{ (v.descricao or '')[:160] }}</a></td>
+<td>{% if v.aprovacao == 1 %}<span class="tag ok">Aprovada</span>{% elif v.aprovacao == 0 %}<span class="tag no">Rejeitada</span>{% endif %}</td></tr>{% endfor %}</table>
+{% else %}Esta proposição não teve votações.{% endif %}</div>
+<h3>Tramitação <small>{{ n_tram }} passo(s){% if n_tram > 60 %} — 60 mais recentes{% endif %}</small></h3>
+<div class="card"><div class="tl">{% for t in tram %}<div><small>{{ t.dataHora[:10] }} · {{ t.siglaOrgao }}{% if t.descricaoSituacao %} · {{ t.descricaoSituacao }}{% endif %}</small><br>
+<b>{{ t.descricaoTramitacao }}</b>{% if t.despacho %}<br><span style="color:var(--mudo)">{{ t.despacho[:300] }}</span>{% endif %}</div>
+{% else %}Sem tramitações.{% endfor %}</div></div>
+{% endblock %}

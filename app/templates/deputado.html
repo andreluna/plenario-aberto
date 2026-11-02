@@ -1,0 +1,38 @@
+{% extends "base.html" %}{% block title %}{{ d.ultimoStatus.nomeEleitoral }} · Plenário Aberto{% endblock %}{% block c %}
+<p><a href="/?ano={{ ano }}">← Voltar ao painel</a></p>
+<div class="card perfil">
+  <img src="{{ d.ultimoStatus.urlFoto }}" alt="">
+  <div><h2>{{ d.ultimoStatus.nomeEleitoral }}</h2>
+  <span class="tag">{{ d.ultimoStatus.siglaPartido }}</span> <span class="tag">{{ d.ultimoStatus.siglaUf }}</span> <span class="tag">{{ d.ultimoStatus.situacao }}</span>
+  <p style="margin:8px 0 0;color:var(--mudo)">ID {{ d.id }} · {{ d.nomeCivil }}<br>
+  {% if d.ultimoStatus.email %}{{ d.ultimoStatus.email }}<br>{% endif %}Nascimento: {{ d.dataNascimento }} ({{ d.municipioNascimento }}/{{ d.ufNascimento }})</p></div>
+</div>
+<h3>Despesas da cota parlamentar</h3>
+<form class="filtros"><select name="ano">{% for a in anos %}<option {{ 'selected' if a==ano }}>{{ a }}</option>{% endfor %}</select><button class="bt">Filtrar</button></form>
+<div class="kpis">
+  <div class="card kpi"><small>Total líquido em {{ ano }}</small><b>{{ total|brl }}</b></div>
+  <div class="card kpi"><small>Lançamentos</small><b>{{ n }}</b></div>
+</div>
+{% if por_tipo %}
+<div class="graficos">
+  <div class="card"><h4>Gasto por mês</h4><div class="cv"><canvas id="g1"></canvas></div></div>
+  <div class="card"><h4>Principais tipos de despesa</h4><div class="cv"><canvas id="g2"></canvas></div></div>
+</div>
+<h3>Por tipo</h3>
+<div class="card tabela"><table><tr><th>Tipo de despesa</th><th class="n">Total</th></tr>
+{% for t,v in por_tipo %}<tr><td>{{ t }}</td><td class="n">{{ v|brl }}</td></tr>{% endfor %}</table></div>
+<h3>Lançamentos{% if n>200 %} <small>(200 mais recentes)</small>{% endif %}</h3>
+<div class="card tabela"><table><tr><th>Data</th><th>Tipo</th><th>Fornecedor</th><th class="n">Valor</th><th></th></tr>
+{% for x in despesas %}<tr><td>{{ x.data }}</td><td>{{ x.tipo }}</td><td>{{ x.fornecedor }}</td><td class="n">{{ x.valor|brl }}</td>
+<td>{% if x.url %}<a href="{{ x.url }}" target="_blank" rel="noopener">nota</a>{% endif %}</td></tr>{% endfor %}</table></div>
+{% else %}<div class="card">Sem despesas registradas neste ano.</div>{% endif %}
+<p class="nota">Fonte: arquivos anuais da cota parlamentar (camara.leg.br/cotas). O endpoint /deputados/{id}/despesas da API retorna vazio.</p>
+{% endblock %}
+{% block js %}{% if por_tipo %}<script nonce="{{ nonce }}">
+const G={{ graf|tojson }};
+function desenhar(){
+  grafico('g1','bar',['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'],G.meses,'--verde',{fmt:brl});
+  grafico('g2','bar',G.tipos.map(t=>t.length>34?t.slice(0,32)+'…':t),G.valores,'--laranja',{horizontal:true,fmt:brl});
+}
+desenhar();
+</script>{% endif %}{% endblock %}

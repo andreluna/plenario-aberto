@@ -1,0 +1,31 @@
+# /etc/systemd/system/plenario-aberto.service
+[Unit]
+Description=Plenario Aberto - painel de dados abertos da Camara (gunicorn)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=plenario-aberto
+Group=plenario-aberto
+WorkingDirectory=/opt/plenario-aberto
+# 1 worker + threads: o índice de despesas (em memória) é compartilhado entre as threads
+ExecStart=/opt/plenario-aberto/.venv/bin/gunicorn --workers 1 --threads 8 --timeout 180 \
+  --bind 127.0.0.1:8000 --limit-request-line 4094 --access-logfile - wsgi:app
+Restart=on-failure
+RestartSec=3
+
+# Endurecimento
+NoNewPrivileges=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+CapabilityBoundingSet=
+ReadWritePaths=/opt/plenario-aberto/cache
+
+[Install]
+WantedBy=multi-user.target

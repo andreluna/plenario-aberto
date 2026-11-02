@@ -1,0 +1,26 @@
+{% extends "base.html" %}{% block title %}Proposições · Plenário Aberto{% endblock %}{% block c %}
+<h2>Proposições</h2>
+<p style="color:var(--mudo);margin:0 0 16px">Projetos, requerimentos e demais proposições, das mais recentes para as mais antigas</p>
+<form class="card filtros">
+  <input name="q" placeholder="Palavra-chave" value="{{ f.q }}">
+  <input name="tipo" list="lt" placeholder="Tipo (PL, PEC…)" value="{{ f.tipo }}" size="12">
+  <datalist id="lt">{% for s,n in tipos %}<option value="{{ s }}">{{ n }}</option>{% endfor %}</datalist>
+  <input name="ano" placeholder="Ano" value="{{ f.ano }}" size="5" maxlength="4">
+  <input name="partido" placeholder="Partido do autor" value="{{ f.partido }}" size="14">
+  <input name="autor" placeholder="Deputado autor (nome ou %nome%)" value="{{ f.autor }}">
+  <input name="uf" list="lu" placeholder="UF" value="{{ f.uf }}" size="4">
+  <datalist id="lu">{% for u in ufs %}<option value="{{ u.sigla }}">{% endfor %}</datalist>
+  <button class="bt">Buscar</button>
+</form>
+{% if aviso %}<div class="card" style="margin-top:16px">{{ aviso }}</div>{% else %}
+<div class="card tabela" style="margin-top:16px"><table><tr><th>Proposição</th><th>Apresentação</th><th>Ementa</th></tr>
+{% for p in lista %}<tr><td style="white-space:nowrap"><a href="/proposicao/{{ p.id }}">{{ p.siglaTipo }} {{ p.numero }}/{{ p.ano }}</a></td>
+<td style="white-space:nowrap">{{ (p.dataApresentacao or '')[:10] }}</td><td class="desc">{{ (p.ementa or '')[:220] }}</td></tr>
+{% else %}<tr><td colspan="3">Nenhuma proposição encontrada.</td></tr>{% endfor %}</table></div>
+<div class="pag">
+  {% if pagina>1 %}<a href="?{{ (f|dictsort|list + [('pagina', pagina-1)])|urlencode }}">← Anterior</a>{% endif %}
+  <span>Página {{ pagina }}</span>
+  {% if tem_prox %}<a href="?{{ (f|dictsort|list + [('pagina', pagina+1)])|urlencode }}">Próxima →</a>{% endif %}
+</div>{% endif %}
+<p class="nota">A busca por autor usa o nome do deputado em exercício (o filtro de autor da API está instável).</p>
+{% endblock %}

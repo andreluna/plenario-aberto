@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{% block title %}Plenário Aberto · Dados Abertos da Câmara{% endblock %}</title>
+<script nonce="{{ nonce }}">try{var t=localStorage.getItem('tema');if(t)document.documentElement.dataset.tema=t}catch(e){}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f6f5;--card:#fff;--txt:#1b2420;--mudo:#667069;--borda:#e1e7e3;--verde:#0a7a47;--verde2:#e3f3ea;--laranja:#e8801a;--sombra:0 1px 2px #0001,0 4px 14px #0000000a;--hdr:#0a5c37}
+@media(prefers-color-scheme:dark){:root:not([data-tema=claro]){--bg:#0f1512;--card:#17201b;--txt:#e6ede9;--mudo:#93a199;--borda:#27342d;--verde:#3fcf8b;--verde2:#17332a;--laranja:#f5a04a;--sombra:0 1px 2px #0006;--hdr:#0b1f17}}
+:root[data-tema=escuro]{--bg:#0f1512;--card:#17201b;--txt:#e6ede9;--mudo:#93a199;--borda:#27342d;--verde:#3fcf8b;--verde2:#17332a;--laranja:#f5a04a;--sombra:0 1px 2px #0006;--hdr:#0b1f17}
+*{box-sizing:border-box}
+body{margin:0;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--txt)}
+a{color:var(--verde)}
+header{background:var(--hdr);color:#fff;position:sticky;top:0;z-index:5}
+header div{max-width:1120px;margin:auto;padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+header a{color:#fff;text-decoration:none;font-weight:700;font-size:17px}header small{opacity:.7;font-weight:400;margin-left:8px}
+header nav{display:flex;gap:18px;flex:1;margin-left:28px}header nav a{font-weight:500;font-size:15px;opacity:.85}header nav a:hover{opacity:1}
+#tema{background:#ffffff1f;color:#fff;border:0;border-radius:20px;padding:6px 14px;cursor:pointer;font-size:14px}
+main{max-width:1120px;margin:24px auto;padding:0 20px 48px}
+h2{margin:0 0 4px}h3{margin:28px 0 12px}h3 small{font-weight:400;color:var(--mudo)}
+.card{background:var(--card);border:1px solid var(--borda);border-radius:12px;box-shadow:var(--sombra);padding:16px}
+.filtros{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input,select,button.bt{font:inherit;padding:9px 12px;border:1px solid var(--borda);border-radius:8px;background:var(--bg);color:var(--txt)}
+input[name=nome]{flex:1;min-width:200px}
+button.bt{background:var(--verde);color:var(--bg);border-color:var(--verde);font-weight:600;cursor:pointer}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0}
+.kpi small{color:var(--mudo);display:block}.kpi b{font-size:24px}.kpi span{color:var(--mudo);font-size:13px}
+.graficos{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));gap:12px}
+.graficos .card{height:320px;display:flex;flex-direction:column}.graficos h4{margin:0 0 8px}.graficos .cv{flex:1;position:relative;min-height:0}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{background:var(--card);border:1px solid var(--borda);border-radius:10px;padding:6px 12px;text-decoration:none;color:var(--txt);font-size:13px;line-height:1.3}
+.chip:hover{border-color:var(--verde)}.chip b{color:var(--verde);font-size:15px;display:block}.chip span{color:var(--mudo)}
+.tabela{overflow-x:auto}table{width:100%;border-collapse:collapse}
+th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--mudo);text-align:left}
+td,th{padding:8px 10px;border-bottom:1px solid var(--borda)}tr:last-child td{border-bottom:0}td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+.ph{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px}.ph h3{margin:0}.ph span{color:var(--mudo)}
+section{margin-top:20px;scroll-margin-top:70px}
+.perfil{display:flex;gap:20px;align-items:center;flex-wrap:wrap}.perfil img{width:110px;height:140px;object-fit:cover;border-radius:10px}
+.tag{display:inline-block;background:var(--verde2);color:var(--verde);border-radius:6px;padding:1px 8px;font-size:13px;font-weight:600}
+.pag{display:flex;gap:16px;align-items:center;margin-top:16px}.pag span{color:var(--mudo)}
+.ok{background:var(--verde2);color:var(--verde)}.no{background:#f8d7d3;color:#a3281b}:root[data-tema=escuro] .no{background:#3b1c18;color:#ff9a8e}@media(prefers-color-scheme:dark){:root:not([data-tema=claro]) .no{background:#3b1c18;color:#ff9a8e}}
+.tl{border-left:2px solid var(--borda);margin-left:6px;padding-left:16px}.tl>div{margin-bottom:14px;position:relative}.tl>div:before{content:"";position:absolute;left:-22px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--verde)}.tl small{color:var(--mudo)}
+.desc{max-width:70ch}
+.nota{color:var(--mudo);font-size:13px;margin-top:20px}
+</style></head><body>
+<header><div><a href="/">🏛️ Plenário Aberto<small>Dados abertos da Câmara</small></a>
+<nav><a href="/">Painel</a><a href="/votacoes">Votações</a><a href="/proposicoes">Proposições</a></nav>
+<button id="tema" type="button" aria-label="Alternar tema">🌓 Tema</button></div></header>
+<main>{% block c %}{% endblock %}</main>
+<script nonce="{{ nonce }}">
+const R=document.documentElement;
+function escuro(){return R.dataset.tema?R.dataset.tema==='escuro':matchMedia('(prefers-color-scheme:dark)').matches}
+document.getElementById('tema').onclick=()=>{const t=escuro()?'claro':'escuro';R.dataset.tema=t;try{localStorage.setItem('tema',t)}catch(e){}if(window.desenhar)desenhar()};
+const cor=n=>getComputedStyle(R).getPropertyValue(n).trim();
+const brl=v=>'R$ '+Number(v).toLocaleString('pt-BR',{maximumFractionDigits:0});
+let _g=[];
+function grafico(id,tipo,labels,dados,corSerie,opt){
+  const el=document.getElementById(id);if(!el)return;
+  const c=Chart.getChart(el);if(c)c.destroy();
+  const horiz=opt&&opt.horizontal,fmt=(opt&&opt.fmt)||(v=>v);
+  Chart.defaults.color=cor('--mudo');Chart.defaults.borderColor=cor('--borda');
+  new Chart(el,{type:tipo,data:{labels,datasets:[{data:dados,backgroundColor:cor(corSerie),borderRadius:4}]},
+   options:{indexAxis:horiz?'y':'x',maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:x=>fmt(x.parsed[horiz?'x':'y'])}}},
+   scales:{[horiz?'x':'y']:{ticks:{callback:v=>fmt(v)}},[horiz?'y':'x']:{grid:{display:false}}}}});
+}
+</script>
+{% block js %}{% endblock %}
+</body></html>

@@ -1,0 +1,32 @@
+{% extends "base.html" %}{% block title %}Votação {{ v.id }} · Plenário Aberto{% endblock %}{% block c %}
+<p><a href="/votacoes">← Votações</a></p>
+<div class="card">
+  <h2>Votação {{ v.id }}</h2>
+  <p>{% if v.aprovacao == 1 %}<span class="tag ok">Aprovada</span>{% elif v.aprovacao == 0 %}<span class="tag no">Rejeitada</span>{% endif %}
+  <span class="tag">{{ v.siglaOrgao }}</span> <span style="color:var(--mudo)">{{ v.dataHoraRegistro }}</span></p>
+  <p class="desc">{{ v.descricao }}</p>
+  {% if v.proposicoesAfetadas %}<p style="margin-bottom:0"><b>Proposições afetadas:</b></p><ul style="margin-top:4px">
+  {% for p in v.proposicoesAfetadas %}<li><a href="/proposicao/{{ p.id }}">{{ p.siglaTipo }} {{ p.numero }}/{{ p.ano }}</a> — {{ (p.ementa or '')[:140] }}</li>{% endfor %}</ul>{% endif %}
+</div>
+{% if n_votos %}
+<h3>Votos por partido <small>{{ n_votos }} votos nominais</small></h3>
+<div class="graficos"><div class="card" style="height:380px;grid-column:1/-1"><div class="cv"><canvas id="g1"></canvas></div></div></div>
+<div class="card tabela" style="margin-top:12px"><table><tr><th>Partido</th>{% for t in tipos %}<th class="n">{{ t }}</th>{% endfor %}<th class="n">Total</th></tr>
+{% for s,c,tot in por_partido %}<tr><td><b>{{ s }}</b></td>{% for t in tipos %}<td class="n">{{ c.get(t,0) }}</td>{% endfor %}<td class="n">{{ tot }}</td></tr>{% endfor %}</table></div>
+{% else %}<div class="card" style="margin-top:16px">Votação simbólica: não há votos individuais registrados.</div>{% endif %}
+{% if orient %}
+<h3>Orientação das lideranças</h3>
+<div class="card tabela"><table><tr><th>Partido / bloco</th><th>Orientação</th></tr>
+{% for o in orient %}<tr><td>{{ o.siglaPartidoBloco }}</td><td>{{ o.orientacaoVoto }}</td></tr>{% endfor %}</table></div>{% endif %}
+{% endblock %}
+{% block js %}{% if n_votos %}<script nonce="{{ nonce }}">
+const G={{ graf|tojson }};
+const CORES={'Sim':'--verde','Não':'--laranja','Abstenção':'--mudo','Obstrução':'--borda'};
+function desenhar(){
+  const el=document.getElementById('g1');const c=Chart.getChart(el);if(c)c.destroy();
+  Chart.defaults.color=cor('--mudo');Chart.defaults.borderColor=cor('--borda');
+  new Chart(el,{type:'bar',data:{labels:G.siglas,datasets:G.tipos.map(t=>({label:t,data:G.dados[t],backgroundColor:cor(CORES[t]||'--verde2')}))},
+   options:{maintainAspectRatio:false,scales:{x:{stacked:true,grid:{display:false}},y:{stacked:true}},plugins:{legend:{position:'bottom'}}}});
+}
+desenhar();
+</script>{% endif %}{% endblock %}
